@@ -8,16 +8,55 @@ case object EmptySquare extends Square
 case class NonEmptySquare(piece: GamePiece) extends Square
 
 
-case class Coord(rank: Int, file: Int)
+case class Coord(rank: Int, file: Int) {
+  def +(other: Coord): Coord = Coord(rank + other.rank, file + other.file)
 
-case class Board(fileCount: Int, rankCount: Int, val placements: Vector[Vector[Square]]) {
+
+}
 
 
-  def emptyBoard: Board = Board(8, 16, Vector.fill(8, 16)(EmptySquare))
+case class Board(fileCount: Int = 8, rankCount: Int = 16,
+                 placements: Vector[Vector[Square]] = Vector.fill(8, 16)(EmptySquare)) {
+
 
   def isValidCoord(c: Coord): Boolean = ((0 to rankCount) contains c.rank) && ((0 to
     fileCount) contains c.file)
 
+  def isEmpty(c: Coord): Boolean = getSquare(c) match {
+    case NonEmptySquare(_) => false
+    case EmptySquare => true
+  }
+
+  def isValidMove(c: Coord): Boolean = isValidCoord(c) && isEmpty(c)
+
+
+  // v: the translations (ie movement relative to current square)
+  // returns: the filtered, relative movements
+  private def validMoves(c0: Coord, v: Vector[Coord]): Vector[Coord] =
+    v filter ((move: Coord) => isValidMove(c0 + move))
+
+
+  // c: a coordinate of the form (x, 0) or (0, y)
+  // returns: a list of all coordinates between (0, 0) and c
+  def pathUntil(c: Coord): Vector[Coord] = c match {
+    case Coord(0, file) => (1 until file).map(Coord(0, _)).toVector
+    case Coord(rank, 0) => (1 until rank).map(Coord(_, 0)).toVector
+  }
+
+  def pathIsEmpty(c0: Coord)(move: Coord): Boolean =
+    pathUntil(move) map (c0 + _) forall isEmpty
+
+  def possibleBlockableMoves(c0: Coord, p: GamePiece): Vector[Coord] =
+    validMoves(c0, p.blockableMoves) filter pathIsEmpty(c0)
+
+  def possibleNonBlockableMoves(c0: Coord, p: GamePiece): Vector[Coord] =
+    validMoves(c0, p.nonBlockableMoves)
+
+  def possibleMoves(c: Coord): Vector[Coord] = getSquare(c) match {
+    case EmptySquare => Vector()
+    case NonEmptySquare(p) => possibleBlockableMoves(c, p) ++
+      possibleNonBlockableMoves(c, p)
+  }
 
   private def updateSquare(c: Coord, s: Square): Board = {
     val file = placements(c.file)
