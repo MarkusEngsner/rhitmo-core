@@ -8,9 +8,10 @@ case object EmptySquare extends Square
 case class NonEmptySquare(piece: GamePiece) extends Square
 
 
-case class Coord(rank: Int, file: Int) {
-  def +(other: Coord): Coord = Coord(rank + other.rank, file + other.file)
+case class Coord(file: Int, rank: Int) {
+  def +(other: Coord): Coord = Coord(file + other.file, rank + other.rank)
 
+  override def toString: String = f"($file; $rank)"
 
 }
 
