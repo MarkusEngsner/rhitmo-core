@@ -52,10 +52,10 @@ case class Board(fileCount: Int = 8, rankCount: Int = 16,
   def possibleNonBlockableMoves(c0: Coord, p: GamePiece): Vector[Coord] =
     validMoves(c0, p.nonBlockableMoves)
 
-  def possibleMoves(c: Coord): Vector[Coord] = getSquare(c) match {
+  def absolutePossibleMoves(c: Coord): Vector[Coord] = getSquare(c) match {
     case EmptySquare => Vector()
-    case NonEmptySquare(p) => possibleBlockableMoves(c, p) ++
-      possibleNonBlockableMoves(c, p)
+    case NonEmptySquare(p) => (possibleBlockableMoves(c, p) ++
+      possibleNonBlockableMoves(c, p)) map (_ + c)
   }
 
   private def updateSquare(c: Coord, s: Square): Board = {
