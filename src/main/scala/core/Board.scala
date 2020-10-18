@@ -19,7 +19,7 @@ case class Board(fileCount: Int = 8, rankCount: Int = 16,
                  placements: Vector[Vector[Square]] = Vector.fill(8, 16)(EmptySquare)) {
 
 
-  def isValidCoord(c: Coord): Boolean = ((0 to rankCount) contains c.rank) && ((0 to
+  def isValidCoord(c: Coord): Boolean = ((0 until rankCount) contains c.rank) && ((0 until
     fileCount) contains c.file)
 
   def isEmpty(c: Coord): Boolean = getSquare(c) match {
@@ -68,6 +68,10 @@ case class Board(fileCount: Int = 8, rankCount: Int = 16,
 
 
   def placePiece(c: Coord, p: GamePiece): Board = updateSquare(c, NonEmptySquare(p))
+
+
+  def buildBoard(v: Vector[(Coord, GamePiece)]) =
+    v.foldLeft(this) { case (b: Board, (c: Coord, p: GamePiece)) => b.placePiece(c, p) }
 
 
   def removePiece(c: Coord): Board = updateSquare(c, EmptySquare)
