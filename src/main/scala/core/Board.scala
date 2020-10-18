@@ -42,6 +42,7 @@ case class Board(fileCount: Int = 8, rankCount: Int = 16,
   def pathUntil(c: Coord): Vector[Coord] = c match {
     case Coord(0, file) => (1 until file).map(Coord(0, _)).toVector
     case Coord(rank, 0) => (1 until rank).map(Coord(_, 0)).toVector
+      // FIXME: add exception on other input
   }
 
   def pathIsEmpty(c0: Coord)(move: Coord): Boolean =
@@ -71,7 +72,7 @@ case class Board(fileCount: Int = 8, rankCount: Int = 16,
   def placePiece(c: Coord, p: GamePiece): Board = updateSquare(c, NonEmptySquare(p))
 
 
-  def buildBoard(v: Vector[(Coord, GamePiece)]) =
+  def buildBoard(v: Vector[(Coord, GamePiece)]): Board =
     v.foldLeft(this) { case (b: Board, (c: Coord, p: GamePiece)) => b.placePiece(c, p) }
 
 
